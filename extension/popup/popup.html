@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmark Manager</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 登录/注册区域 -->
+    <div id="auth-section" class="auth-section">
+      <h2>收藏夹管理</h2>
+      <div id="login-form">
+        <input type="email" id="email" placeholder="邮箱" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <button id="login-btn">登录</button>
+        <p>没有账户？<a href="#" id="show-register">注册</a></p>
+      </div>
+      
+      <div id="register-form" class="hidden">
+        <input type="email" id="reg-email" placeholder="邮箱" required>
+        <input type="password" id="reg-password" placeholder="密码" required>
+        <input type="password" id="reg-confirm-password" placeholder="确认密码" required>
+        <button id="register-btn">注册</button>
+        <p>已有账户？<a href="#" id="show-login">登录</a></p>
+      </div>
+    </div>
+
+    <!-- 收藏夹管理区域 -->
+    <div id="bookmark-section" class="bookmark-section hidden">
+      <div class="header">
+        <h2>我的收藏夹</h2>
+        <button id="logout-btn" class="logout-btn">退出</button>
+      </div>
+      
+      <div class="add-bookmark">
+        <input type="text" id="bookmark-title" placeholder="标题">
+        <input type="url" id="bookmark-url" placeholder="URL">
+        <button id="add-bookmark-btn">添加</button>
+      </div>
+      
+      <div class="bookmarks-list" id="bookmarks-list">
+        <!-- 收藏夹列表将在这里动态生成 -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- 编辑收藏夹模态框 -->
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>编辑收藏夹</h3>
+      <input type="text" id="edit-title" placeholder="标题">
+      <input type="url" id="edit-url" placeholder="URL">
+      <div class="modal-buttons">
+        <button id="save-edit-btn">保存</button>
+        <button id="cancel-edit-btn" class="secondary">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../config/config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

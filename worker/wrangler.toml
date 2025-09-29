@@ -1,0 +1,39 @@
+name = "bookmark-worker"
+main = "src/index.js"
+compatibility_date = "2023-01-01"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# D1数据库配置
+[[d1_databases]]
+binding = "BOOKMARK_DB"
+database_name = "bookmark_db"
+database_id = "your-database-id" # 需要替换为实际的D1数据库ID
+
+# 开发环境配置
+[env.development.d1_databases]
+binding = "BOOKMARK_DB"
+database_name = "bookmark_db_dev"
+database_id = "your-dev-database-id" # 需要替换为开发环境的D1数据库ID
+
+# 环境变量将在部署时通过wrangler secret设置
+# [vars]
+# JWT_SECRET = "your-jwt-secret" # 需要替换为实际的JWT密钥
+# CORS_ORIGIN = "chrome-extension://your-extension-id" # 需要替换为实际的扩展ID
+
+# 生产环境变量将在部署时通过wrangler secret设置
+# [env.production.vars]
+# JWT_SECRET = "your-production-jwt-secret" # 需要替换为生产环境的JWT密钥
+# CORS_ORIGIN = "chrome-extension://your-production-extension-id" # 需要替换为生产环境的扩展ID
+
+# 开发环境变量将在部署时通过wrangler secret设置
+# [env.development.vars]
+# JWT_SECRET = "your-dev-jwt-secret" # 需要替换为开发环境的JWT密钥
+# CORS_ORIGIN = "*" # 开发环境允许所有来源

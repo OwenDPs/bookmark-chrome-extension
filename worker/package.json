@@ -1,0 +1,26 @@
+{
+  "name": "bookmark-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for Bookmark Manager Chrome Extension",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 execute BOOKMARK_DB --local --file=./migrations/001_init.sql",
+    "migrate:prod": "wrangler d1 execute BOOKMARK_DB --file=./migrations/001_init.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "@cloudflare/d1": "^0.1.0"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "bookmark",
+    "chrome-extension"
+  ],
+  "author": "",
+  "license": "MIT"
+}

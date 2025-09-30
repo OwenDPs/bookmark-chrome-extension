@@ -20,16 +20,36 @@ export class APIClient {
    * @returns {Promise<Object>} 响应数据
    */
   async request(endpoint, options = {}) {
-    const url = `${this.baseUrl}${endpoint}`;
+    // 标准化URL构建，避免双斜杠问题
+    let url;
+
+    // 确保baseUrl格式正确
+    const normalizedBaseUrl = this.baseUrl.endsWith('/')
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
+
+    // 确保endpoint格式正确
+    const normalizedEndpoint = endpoint.startsWith('/')
+      ? endpoint
+      : `/${endpoint}`;
+
+    // 构建最终URL
+    url = `${normalizedBaseUrl}${normalizedEndpoint}`;
+
     console.log(`[API Debug] ====== 开始API请求 ======`);
+    console.log(`[API Debug] 原始baseUrl: "${this.baseUrl}"`);
+    console.log(`[API Debug] 原始endpoint: "${endpoint}"`);
+    console.log(`[API Debug] 标准化后baseUrl: "${normalizedBaseUrl}"`);
+    console.log(`[API Debug] 标准化后endpoint: "${normalizedEndpoint}"`);
+    
     console.log(`[API Debug] 发送请求到: ${url}`);
-    console.log(`[API Debug] 使用的baseUrl: ${this.baseUrl}`);
-    console.log(`[API Debug] 请求端点: ${endpoint}`);
+    console.log(`[API Debug] 使用的baseUrl: "${this.baseUrl}"`);
+    console.log(`[API Debug] 请求端点: "${endpoint}"`);
     console.log(`[API Debug] 请求方法: ${options.method || 'GET'}`);
     console.log(`[API Debug] 请求选项:`, options);
     console.log(`[API Debug] baseUrl是否为默认值: ${this.baseUrl === 'https://your-worker.your-subdomain.workers.dev'}`);
     console.log(`[API Debug] baseUrl是否为配置值: ${this.baseUrl === 'https://bookmark-chrome.xto.workers.dev/'}`);
-    console.log(`[API Debug] 完整URL: ${url}`);
+    console.log(`[API Debug] 完整URL: "${url}"`);
     console.log(`[API Debug] 当前时间戳:`, new Date().toISOString());
     
     const token = await getAuthToken();

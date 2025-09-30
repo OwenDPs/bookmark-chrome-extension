@@ -90,8 +90,17 @@ export class Router {
    */
   async handle(request, env) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    let path = url.pathname;
     const method = request.method.toUpperCase();
+
+    // 标准化路径：处理双斜杠和多余斜杠
+    const originalPath = path;
+    path = path.replace(/\/+/g, '/').replace(/\/$/, ''); // 移除双斜杠并去掉末尾斜杠
+
+    console.log(`[Router Debug] 原始路径: "${originalPath}"`);
+    console.log(`[Router Debug] 标准化后的路径: "${path}"`);
+    console.log(`[Router Debug] 是否进行了路径标准化: ${originalPath !== path}`);
+    
     const key = `${method}:${path}`;
 
     console.log(`[Router Debug] ====== 开始处理请求 ======`);

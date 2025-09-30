@@ -3,7 +3,7 @@ const CONFIG = {
   // API配置
   API: {
     // 默认API URL，将在部署时替换为实际的Worker URL
-    BASE_URL: 'https://bookmark-chrome.xto.workers.dev/',
+    BASE_URL: 'https://bookmark-chrome.xto.workers.dev',
     
     // API端点
     ENDPOINTS: {
@@ -61,7 +61,10 @@ const CONFIG = {
 
 // 导出配置
 console.log('[Config Debug] ====== 开始导出配置 ======');
-console.log('[Config Debug] CONFIG.API.BASE_URL:', CONFIG.API.BASE_URL);
+console.log('[Config Debug] CONFIG.API.BASE_URL:', `"${CONFIG.API.BASE_URL}"`);
+console.log('[Config Debug] BASE_URL是否以斜杠结尾:', CONFIG.API.BASE_URL.endsWith('/'));
+console.log('[Config Debug] BASE_URL长度:', CONFIG.API.BASE_URL.length);
+console.log('[Config Debug] BASE_URL最后一个字符:', CONFIG.API.BASE_URL.slice(-1));
 console.log('[Config Debug] 当前环境信息:', {
   hasModule: typeof module !== 'undefined',
   hasWindow: typeof window !== 'undefined',

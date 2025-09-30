@@ -31,41 +31,6 @@ export function withAuth(handler) {
   });
 }
 
-/**
- * 创建错误响应
- * @param {string} message - 错误消息
- * @param {number} status - HTTP状态码
- * @param {Object} headers - 额外的响应头
- * @returns {Response} 错误响应
- * @deprecated 使用 errorHandler.js 中的 createErrorResponse
- */
-export function createErrorResponse(message, status = 400, headers = {}) {
-  return new Response(JSON.stringify({ error: message }), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
-  });
-}
-
-/**
- * 创建JSON响应
- * @param {Object} data - 响应数据
- * @param {number} status - HTTP状态码
- * @param {Object} headers - 额外的响应头
- * @returns {Response} JSON响应
- * @deprecated 使用 errorHandler.js 中的 createJSONResponse
- */
-export function createJSONResponse(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
-  });
-}
 
 /**
  * 验证请求体数据

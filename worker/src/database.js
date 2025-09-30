@@ -35,51 +35,24 @@ export class DatabaseUtils {
       // 分别执行每条SQL语句，避免多行SQL问题
       const sqlStatements = [
         // 用户表
-        `CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          email TEXT NOT NULL UNIQUE,
-          password_hash TEXT NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`,
+        "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
 
         // 收藏夹表
-        `CREATE TABLE IF NOT EXISTS bookmarks (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER NOT NULL,
-          title TEXT NOT NULL,
-          url TEXT NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )`,
+        "CREATE TABLE IF NOT EXISTS bookmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, title TEXT NOT NULL, url TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)",
 
         // 速率限制表
-        `CREATE TABLE IF NOT EXISTS rate_limits (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          key TEXT NOT NULL,
-          timestamp INTEGER NOT NULL
-        )`,
+        "CREATE TABLE IF NOT EXISTS rate_limits (id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT NOT NULL, timestamp INTEGER NOT NULL)",
 
         // 创建索引
-        `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
-        `CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id)`,
-        `CREATE INDEX IF NOT EXISTS idx_bookmarks_created_at ON bookmarks(created_at)`,
-        `CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id_created_at ON bookmarks(user_id, created_at)`,
-        `CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp)`,
+        "CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
+        "CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id)",
+        "CREATE INDEX IF NOT EXISTS idx_bookmarks_created_at ON bookmarks(created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id_created_at ON bookmarks(user_id, created_at)",
+        "CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp)",
 
         // 创建触发器
-        `CREATE TRIGGER IF NOT EXISTS update_users_timestamp
-         AFTER UPDATE ON users
-         BEGIN
-           UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
-         END`,
-
-        `CREATE TRIGGER IF NOT EXISTS update_bookmarks_timestamp
-         AFTER UPDATE ON bookmarks
-         BEGIN
-           UPDATE bookmarks SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
-         END`
+        "CREATE TRIGGER IF NOT EXISTS update_users_timestamp AFTER UPDATE ON users BEGIN UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id; END",
+        "CREATE TRIGGER IF NOT EXISTS update_bookmarks_timestamp AFTER UPDATE ON bookmarks BEGIN UPDATE bookmarks SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id; END"
       ];
 
       // 逐条执行SQL语句
@@ -129,13 +102,8 @@ export async function createRateLimitTable(env) {
       console.log('[DatabaseUtils] 表不存在，正在创建...');
 
       // 分别执行创建表和索引的语句
-      await env.BOOKMARK_DB.exec(`CREATE TABLE rate_limits (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key TEXT NOT NULL,
-        timestamp INTEGER NOT NULL
-      )`);
-
-      await env.BOOKMARK_DB.exec(`CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp)`);
+      await env.BOOKMARK_DB.exec("CREATE TABLE rate_limits (id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT NOT NULL, timestamp INTEGER NOT NULL)");
+      await env.BOOKMARK_DB.exec("CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp)");
 
       console.log('[DatabaseUtils] 速率限制表创建成功');
     } else {

@@ -13,6 +13,7 @@ try {
   config = window.BookmarkExtensionConfig || {};
   console.log('[Config Debug] 从全局变量加载的配置:', config);
   console.log('[Config Debug] config.API.BASE_URL:', config.API?.BASE_URL);
+  console.log('[Config Debug] window对象包含的属性:', Object.keys(window));
 } catch (error) {
   console.error('[Config Debug] 加载配置失败:', error);
   // 使用默认配置
@@ -28,6 +29,7 @@ try {
 const API_BASE_URL = config.API?.BASE_URL || 'https://your-worker.your-subdomain.workers.dev';
 console.log('[Config Debug] 实际使用的API_BASE_URL:', API_BASE_URL);
 console.log('[Config Debug] 是否使用了默认URL:', API_BASE_URL === 'https://your-worker.your-subdomain.workers.dev');
+console.log('[Config Debug] API_BASE_URL 是否有效:', API_BASE_URL && API_BASE_URL !== 'https://your-worker.your-subdomain.workers.dev');
 
 // 创建API客户端
 const apiClient = createAPIClient(API_BASE_URL);
@@ -170,9 +172,15 @@ async function handleLogin() {
 
 // 处理用户注册
 async function handleRegister() {
+  console.log('[Register Debug] 开始处理注册请求');
+  
   const email = document.getElementById('reg-email').value;
   const password = document.getElementById('reg-password').value;
   const confirmPassword = document.getElementById('reg-confirm-password').value;
+  
+  console.log('[Register Debug] 表单数据:', { email, password: '***', confirmPassword: '***' });
+  console.log('[Register Debug] API_BASE_URL:', API_BASE_URL);
+  console.log('[Register Debug] apiClient对象:', apiClient);
   
   // 表单验证
   const validation = errorHandler.validate(
@@ -189,19 +197,25 @@ async function handleRegister() {
   );
   
   if (!validation.valid) {
+    console.log('[Register Debug] 表单验证失败:', validation.errors);
     showNotification(validation.errors.join(', '), 'error');
     return;
   }
   
+  console.log('[Register Debug] 表单验证通过，准备发送API请求');
+  
   try {
+    console.log('[Register Debug] 调用 apiClient.auth.register');
     const data = await errorHandler.handleApiCall(
       () => apiClient.auth.register(email, password),
       '注册失败'
     );
+    console.log('[Register Debug] 注册成功，返回数据:', data);
     saveAuthToken(data.token);
     showBookmarkSection();
     showNotification('注册成功', 'success');
   } catch (error) {
+    console.log('[Register Debug] 注册失败，错误信息:', error);
     // 错误已经在handleApiCall中处理
   }
 }

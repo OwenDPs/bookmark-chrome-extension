@@ -60,8 +60,14 @@ const CONFIG = {
 };
 
 // 导出配置
-console.log('[Config Debug] 开始导出配置...');
+console.log('[Config Debug] ====== 开始导出配置 ======');
 console.log('[Config Debug] CONFIG.API.BASE_URL:', CONFIG.API.BASE_URL);
+console.log('[Config Debug] 当前环境信息:', {
+  hasModule: typeof module !== 'undefined',
+  hasWindow: typeof window !== 'undefined',
+  hasGlobalThis: typeof globalThis !== 'undefined',
+  isExtension: typeof chrome !== 'undefined' && chrome.runtime
+});
 
 if (typeof module !== 'undefined' && module.exports) {
   console.log('[Config Debug] 使用 CommonJS 导出配置');
@@ -70,6 +76,7 @@ if (typeof module !== 'undefined' && module.exports) {
   console.log('[Config Debug] 使用 window 对象导出配置');
   window.BookmarkExtensionConfig = CONFIG;
   console.log('[Config Debug] 配置已设置到 window.BookmarkExtensionConfig');
+  console.log('[Config Debug] 验证 window.BookmarkExtensionConfig:', window.BookmarkExtensionConfig);
 }
 
 // 确保在非模块环境中也能访问配置
@@ -77,6 +84,26 @@ if (typeof globalThis !== 'undefined') {
   console.log('[Config Debug] 使用 globalThis 对象导出配置');
   globalThis.BookmarkExtensionConfig = CONFIG;
   console.log('[Config Debug] 配置已设置到 globalThis.BookmarkExtensionConfig');
+  console.log('[Config Debug] 验证 globalThis.BookmarkExtensionConfig:', globalThis.BookmarkExtensionConfig);
+}
+
+// 如果在Chrome扩展环境中，也设置到chrome对象
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  console.log('[Config Debug] 检测到Chrome扩展环境');
+  try {
+    chrome.runtime.getBackgroundPage && chrome.runtime.getBackgroundPage((page) => {
+      if (page) {
+        page.BookmarkExtensionConfig = CONFIG;
+        console.log('[Config Debug] 配置已设置到background page');
+      }
+    });
+  } catch (error) {
+    console.log('[Config Debug] 无法设置到background page:', error);
+  }
 }
 
 console.log('[Config Debug] 配置导出完成');
+console.log('[Config Debug] 最终配置验证:', {
+  windowConfig: typeof window !== 'undefined' ? window.BookmarkExtensionConfig : 'N/A',
+  globalThisConfig: typeof globalThis !== 'undefined' ? globalThis.BookmarkExtensionConfig : 'N/A'
+});

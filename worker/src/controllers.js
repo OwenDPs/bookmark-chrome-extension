@@ -25,34 +25,51 @@ export const AuthController = {
    * @returns {Promise<Response>} 响应对象
    */
   register: withErrorHandling(async (request, env) => {
+    console.log(`[AuthController Debug] ====== 开始处理注册请求 ======`);
+    console.log(`[AuthController Debug] 请求方法: ${request.method}`);
+    console.log(`[AuthController Debug] 请求URL: ${request.url}`);
+    console.log(`[AuthController Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
+    
     const { email, password } = await parseRequestBody(request);
+    console.log(`[AuthController Debug] 解析的请求体:`, { email, password: '***' });
+    console.log(`[AuthController Debug] 环境变量:`, {
+      hasDb: !!env.BOOKMARK_DB,
+      hasJwtSecret: !!env.JWT_SECRET
+    });
     
     // 验证请求体
     const validation = validateRequestBody({ email, password }, ['email', 'password']);
     if (!validation.valid) {
+      console.log(`[AuthController Debug] 请求体验证失败:`, validation.errors);
       throw new ValidationError(validation.errors.join(', '));
     }
     
     // 验证邮箱格式
     if (!isValidEmail(email)) {
+      console.log(`[AuthController Debug] 邮箱格式验证失败: ${email}`);
       throw new ValidationError('邮箱格式不正确');
     }
     
     // 检查是否为临时邮箱
     if (SecurityUtils.isTemporaryEmail(email)) {
+      console.log(`[AuthController Debug] 临时邮箱验证失败: ${email}`);
       throw new ValidationError('不支持使用临时邮箱注册');
     }
     
     // 验证密码强度
     const passwordStrength = SecurityUtils.validatePasswordStrength(password);
     if (!passwordStrength.valid) {
+      console.log(`[AuthController Debug] 密码强度验证失败:`, passwordStrength.errors);
       throw new ValidationError(passwordStrength.errors.join(', '));
     }
     
     // 检查是否为常见密码
     if (SecurityUtils.isCommonPassword(password)) {
+      console.log(`[AuthController Debug] 常见密码验证失败`);
       throw new ValidationError('密码过于常见，请使用更复杂的密码');
     }
+    
+    console.log(`[AuthController Debug] 基本验证通过，检查数据库连接...`);
     
     // 检查用户是否已存在
     const existingUser = await env.BOOKMARK_DB.prepare(
@@ -60,20 +77,28 @@ export const AuthController = {
     ).bind(email).first();
     
     if (existingUser) {
+      console.log(`[AuthController Debug] 用户已存在: ${email}`);
       throw new ValidationError('该邮箱已被注册');
     }
     
+    console.log(`[AuthController Debug] 用户不存在，开始创建用户...`);
+    
     // 哈希密码
     const passwordHash = await hashPassword(password);
+    console.log(`[AuthController Debug] 密码哈希完成`);
     
     // 创建用户
     const result = await env.BOOKMARK_DB.prepare(
       'INSERT INTO users (email, password_hash) VALUES (?, ?) RETURNING id, email, created_at'
     ).bind(email, passwordHash).first();
     
+    console.log(`[AuthController Debug] 用户创建成功:`, { id: result.id, email: result.email });
+    
     // 生成JWT令牌
     const token = await TokenService.generateToken(result.id, result.email, env.JWT_SECRET);
+    console.log(`[AuthController Debug] JWT令牌生成成功`);
     
+    console.log(`[AuthController Debug] 注册流程完成，返回成功响应`);
     return createJSONResponse({
       message: '注册成功',
       token,

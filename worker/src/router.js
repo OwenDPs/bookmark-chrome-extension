@@ -94,19 +94,24 @@ export class Router {
     const method = request.method.toUpperCase();
     const key = `${method}:${path}`;
 
+    console.log(`[Router Debug] ====== 开始处理请求 ======`);
     console.log(`[Router Debug] 收到请求: ${method} ${path}`);
+    console.log(`[Router Debug] 完整请求URL: ${request.url}`);
     console.log(`[Router Debug] 查找路由键: ${key}`);
     console.log(`[Router Debug] 已注册的路由:`, Object.keys(this.routes));
     console.log(`[Router Debug] 路由总数: ${Object.keys(this.routes).length}`);
+    console.log(`[Router Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
     
     // 查找路由
     const route = this.routes[key];
     if (!route) {
       console.log(`[Router Debug] 精确匹配失败，尝试匹配带参数的路由`);
+      console.log(`[Router Debug] 查找路径: ${path}, 方法: ${method}`);
       // 尝试匹配带参数的路由，如 /api/bookmarks/:id
       const matchedRoute = this.matchRoute(path, method);
       if (!matchedRoute) {
         console.log(`[Router Debug] 路由匹配失败，返回404`);
+        console.log(`[Router Debug] 可用的路由键:`, Object.keys(this.routes).join(', '));
         return createErrorResponse('未找到路由', 404);
       }
       
@@ -114,6 +119,7 @@ export class Router {
       // 提取路由参数
       const params = this.extractParams(path, matchedRoute.path);
       request.params = params;
+      console.log(`[Router Debug] 提取的路由参数:`, params);
       
       // 应用中间件和处理函数
       return this.applyMiddlewaresAndHandler(
@@ -124,7 +130,7 @@ export class Router {
       );
     }
     
-    console.log(`[Router Debug] 精确匹配成功`);
+    console.log(`[Router Debug] 精确匹配成功，找到路由:`, route);
     // 应用中间件和处理函数
     return this.applyMiddlewaresAndHandler(
       request,

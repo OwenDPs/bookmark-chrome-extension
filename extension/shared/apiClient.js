@@ -27,6 +27,7 @@ export class APIClient {
     console.log(`[API Debug] 请求方法: ${options.method || 'GET'}`);
     console.log(`[API Debug] 请求选项:`, options);
     console.log(`[API Debug] baseUrl是否为默认值: ${this.baseUrl === 'https://your-worker.your-subdomain.workers.dev'}`);
+    console.log(`[API Debug] 完整URL: ${url}`);
     
     const token = await getAuthToken();
     console.log(`[API Debug] 认证token: ${token ? '存在' : '不存在'}`);
@@ -50,22 +51,31 @@ export class APIClient {
     
     try {
       console.log(`[API Debug] 实际请求配置:`, config);
+      console.log(`[API Debug] 准备发送fetch请求...`);
       const response = await fetch(url, config);
       
       console.log(`[API Debug] 响应状态: ${response.status}`);
-      console.log(`[API Debug] 响应头:`, response.headers);
+      console.log(`[API Debug] 响应状态文本: ${response.statusText}`);
+      console.log(`[API Debug] 响应头:`, Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        console.log(`[API Debug] 响应不成功，尝试解析错误信息...`);
+        const errorData = await response.json().catch(() => {
+          console.log(`[API Debug] 无法解析JSON响应，使用文本响应`);
+          return response.text().then(text => ({ message: text }));
+        });
         console.error(`[API Debug] 请求失败，错误数据:`, errorData);
-        throw new Error(errorData.error || `API请求失败: ${response.status}`);
+        throw new Error(errorData.error || errorData.message || `API请求失败: ${response.status}`);
       }
       
+      console.log(`[API Debug] 响应成功，解析JSON数据...`);
       const responseData = await response.json();
       console.log(`[API Debug] 响应数据:`, responseData);
       return responseData;
     } catch (error) {
       console.error(`[API Debug] 请求异常:`, error);
+      console.error(`[API Debug] 错误类型:`, error.constructor.name);
+      console.error(`[API Debug] 错误消息:`, error.message);
       throw error;
     }
   }

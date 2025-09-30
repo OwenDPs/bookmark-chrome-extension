@@ -93,12 +93,24 @@ export default {
     const path = url.pathname;
     const method = request.method;
     
+    console.log(`[Worker Debug] ====== Worker 开始处理请求 ======`);
     console.log(`[Worker Debug] 收到请求: ${method} ${url.href}`);
     console.log(`[Worker Debug] 请求路径: ${path}`);
     console.log(`[Worker Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
+    console.log(`[Worker Debug] 环境变量:`, {
+      hasDb: !!env.BOOKMARK_DB,
+      hasJwtSecret: !!env.JWT_SECRET,
+      corsOrigin: env.CORS_ORIGIN
+    });
     
     // 初始化速率限制表
-    await createRateLimitTable(env);
+    try {
+      console.log(`[Worker Debug] 初始化速率限制表...`);
+      await createRateLimitTable(env);
+      console.log(`[Worker Debug] 速率限制表初始化成功`);
+    } catch (error) {
+      console.error(`[Worker Debug] 速率限制表初始化失败:`, error);
+    }
     
     // 处理OPTIONS请求（CORS预检）
     if (method === 'OPTIONS') {
@@ -108,14 +120,18 @@ export default {
     
     try {
       console.log(`[Worker Debug] 开始路由处理`);
+      console.log(`[Worker Debug] 路由器对象:`, router);
+      console.log(`[Worker Debug] 路由器路由数量:`, Object.keys(router.routes).length);
       // 使用路由器处理请求
       const response = await router.handle(request, env);
       
       console.log(`[Worker Debug] 路由处理成功，响应状态: ${response.status}`);
+      console.log(`[Worker Debug] 响应头:`, Object.fromEntries(response.headers.entries()));
       // 添加CORS头
       return addCORSHeaders(response, request, env);
     } catch (error) {
       console.error(`[Worker Debug] 请求处理失败:`, error);
+      console.error(`[Worker Debug] 错误堆栈:`, error.stack);
       
       // 添加CORS头到错误响应
       const corsHeaders = setCORSHeaders(request, env);

@@ -21,16 +21,19 @@
     "default_popup": "popup/popup.html",
     "default_title": "Bookmark Manager",
     "default_icon": {
-      "16": "assets/icon16.png",
-      "48": "assets/icon48.png",
-      "128": "assets/icon128.png"
+      "16": "assets/icon-placeholder.svg",
+      "48": "assets/icon-placeholder.svg",
+      "128": "assets/icon-placeholder.svg"
     }
   },
-  "options_page": "options/options.html",
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
   "icons": {
-    "16": "assets/icon16.png",
-    "48": "assets/icon48.png",
-    "128": "assets/icon128.png"
+    "16": "assets/icon-placeholder.svg",
+    "48": "assets/icon-placeholder.svg",
+    "128": "assets/icon-placeholder.svg"
   },
   "content_scripts": [
     {

@@ -65,3 +65,8 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
   window.BookmarkExtensionConfig = CONFIG;
 }
+
+// 确保在非模块环境中也能访问配置
+if (typeof globalThis !== 'undefined') {
+  globalThis.BookmarkExtensionConfig = CONFIG;
+}

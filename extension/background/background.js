@@ -1,7 +1,21 @@
-// 导入共享工具函数
-import { getAuthToken, saveAuthToken, removeAuthToken } from '../shared/utils.js';
-
 // 后台脚本，处理扩展的后台任务
+
+// 共享工具函数
+function getAuthToken() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['auth_token'], (result) => {
+      resolve(result.auth_token || null);
+    });
+  });
+}
+
+function saveAuthToken(token) {
+  chrome.storage.local.set({ auth_token: token });
+}
+
+function removeAuthToken() {
+  chrome.storage.local.remove(['auth_token']);
+}
 
 // 扩展安装时的初始化
 chrome.runtime.onInstalled.addListener((details) => {

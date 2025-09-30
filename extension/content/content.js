@@ -1,7 +1,33 @@
-// 导入共享工具函数
-import { showNotification } from '../shared/utils.js';
-
 // 内容脚本，用于在网页上添加功能
+
+// 共享工具函数
+function showNotification(message, type = 'info') {
+  // 移除现有通知
+  const existingNotification = document.querySelector('.notification');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+  
+  // 创建新通知
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // 显示通知
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 10);
+  
+  // 3秒后隐藏通知
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 3000);
+}
 
 // 创建一个浮动按钮，用于快速添加当前页面到收藏夹
 function createFloatingButton() {

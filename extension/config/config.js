@@ -3,7 +3,7 @@ const CONFIG = {
   // API配置
   API: {
     // 默认API URL，将在部署时替换为实际的Worker URL
-    BASE_URL: 'https://your-worker.your-subdomain.workers.dev',
+    BASE_URL: 'https://bookmark-chrome.xto.workers.dev/',
     
     // API端点
     ENDPOINTS: {
@@ -60,13 +60,23 @@ const CONFIG = {
 };
 
 // 导出配置
+console.log('[Config Debug] 开始导出配置...');
+console.log('[Config Debug] CONFIG.API.BASE_URL:', CONFIG.API.BASE_URL);
+
 if (typeof module !== 'undefined' && module.exports) {
+  console.log('[Config Debug] 使用 CommonJS 导出配置');
   module.exports = CONFIG;
 } else if (typeof window !== 'undefined') {
+  console.log('[Config Debug] 使用 window 对象导出配置');
   window.BookmarkExtensionConfig = CONFIG;
+  console.log('[Config Debug] 配置已设置到 window.BookmarkExtensionConfig');
 }
 
 // 确保在非模块环境中也能访问配置
 if (typeof globalThis !== 'undefined') {
+  console.log('[Config Debug] 使用 globalThis 对象导出配置');
   globalThis.BookmarkExtensionConfig = CONFIG;
+  console.log('[Config Debug] 配置已设置到 globalThis.BookmarkExtensionConfig');
 }
+
+console.log('[Config Debug] 配置导出完成');

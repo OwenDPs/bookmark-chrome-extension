@@ -5,21 +5,29 @@ import { createErrorHandler, ValidationError, AuthError } from '../shared/errorH
 
 // 加载配置
 let config;
+console.log('[Config Debug] 开始加载配置...');
+console.log('[Config Debug] window.BookmarkExtensionConfig 存在:', typeof window.BookmarkExtensionConfig !== 'undefined');
+
 try {
   // 在扩展环境中，配置通过全局变量提供
   config = window.BookmarkExtensionConfig || {};
+  console.log('[Config Debug] 从全局变量加载的配置:', config);
+  console.log('[Config Debug] config.API.BASE_URL:', config.API?.BASE_URL);
 } catch (error) {
-  console.error('加载配置失败:', error);
+  console.error('[Config Debug] 加载配置失败:', error);
   // 使用默认配置
   config = {
     API: {
       BASE_URL: 'https://your-worker.your-subdomain.workers.dev'
     }
   };
+  console.log('[Config Debug] 使用默认配置:', config);
 }
 
 // API配置
 const API_BASE_URL = config.API?.BASE_URL || 'https://your-worker.your-subdomain.workers.dev';
+console.log('[Config Debug] 实际使用的API_BASE_URL:', API_BASE_URL);
+console.log('[Config Debug] 是否使用了默认URL:', API_BASE_URL === 'https://your-worker.your-subdomain.workers.dev');
 
 // 创建API客户端
 const apiClient = createAPIClient(API_BASE_URL);

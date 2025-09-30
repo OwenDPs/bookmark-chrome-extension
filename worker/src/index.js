@@ -93,22 +93,29 @@ export default {
     const path = url.pathname;
     const method = request.method;
     
+    console.log(`[Worker Debug] 收到请求: ${method} ${url.href}`);
+    console.log(`[Worker Debug] 请求路径: ${path}`);
+    console.log(`[Worker Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
+    
     // 初始化速率限制表
     await createRateLimitTable(env);
     
     // 处理OPTIONS请求（CORS预检）
     if (method === 'OPTIONS') {
+      console.log(`[Worker Debug] 处理OPTIONS请求`);
       return handleOptionsRequest(request, env);
     }
     
     try {
+      console.log(`[Worker Debug] 开始路由处理`);
       // 使用路由器处理请求
       const response = await router.handle(request, env);
       
+      console.log(`[Worker Debug] 路由处理成功，响应状态: ${response.status}`);
       // 添加CORS头
       return addCORSHeaders(response, request, env);
     } catch (error) {
-      console.error('请求处理失败:', error);
+      console.error(`[Worker Debug] 请求处理失败:`, error);
       
       // 添加CORS头到错误响应
       const corsHeaders = setCORSHeaders(request, env);

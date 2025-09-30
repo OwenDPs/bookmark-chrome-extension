@@ -7,17 +7,23 @@ import { createErrorHandler } from '../shared/errorHandler.js';
 
 // 加载配置
 let config;
+console.log('[Config Debug] Options页面开始加载配置...');
+console.log('[Config Debug] Options页面 window.BookmarkExtensionConfig 存在:', typeof window.BookmarkExtensionConfig !== 'undefined');
+
 try {
   // 在扩展环境中，配置通过全局变量提供
   config = window.BookmarkExtensionConfig || {};
+  console.log('[Config Debug] Options页面从全局变量加载的配置:', config);
+  console.log('[Config Debug] Options页面 config.API.BASE_URL:', config.API?.BASE_URL);
 } catch (error) {
-  console.error('加载配置失败:', error);
+  console.error('[Config Debug] Options页面加载配置失败:', error);
   // 使用默认配置
   config = {
     API: {
       BASE_URL: 'https://your-worker.your-subdomain.workers.dev'
     }
   };
+  console.log('[Config Debug] Options页面使用默认配置:', config);
 }
 
 // DOM元素
@@ -31,6 +37,8 @@ const floatingButtonToggle = document.getElementById('floating-button-toggle');
 
 // 默认API URL
 const DEFAULT_API_URL = config.API?.BASE_URL || 'https://your-worker.your-subdomain.workers.dev';
+console.log('[Config Debug] Options页面实际使用的DEFAULT_API_URL:', DEFAULT_API_URL);
+console.log('[Config Debug] Options页面是否使用了默认URL:', DEFAULT_API_URL === 'https://your-worker.your-subdomain.workers.dev');
 
 // 创建API客户端
 let apiClient = createAPIClient(DEFAULT_API_URL);

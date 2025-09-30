@@ -21,7 +21,15 @@ export class APIClient {
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+    console.log(`[API Debug] 发送请求到: ${url}`);
+    console.log(`[API Debug] 使用的baseUrl: ${this.baseUrl}`);
+    console.log(`[API Debug] 请求端点: ${endpoint}`);
+    console.log(`[API Debug] 请求方法: ${options.method || 'GET'}`);
+    console.log(`[API Debug] 请求选项:`, options);
+    console.log(`[API Debug] baseUrl是否为默认值: ${this.baseUrl === 'https://your-worker.your-subdomain.workers.dev'}`);
+    
     const token = await getAuthToken();
+    console.log(`[API Debug] 认证token: ${token ? '存在' : '不存在'}`);
     
     const defaultHeaders = {
       'Content-Type': 'application/json'
@@ -41,16 +49,23 @@ export class APIClient {
     };
     
     try {
+      console.log(`[API Debug] 实际请求配置:`, config);
       const response = await fetch(url, config);
+      
+      console.log(`[API Debug] 响应状态: ${response.status}`);
+      console.log(`[API Debug] 响应头:`, response.headers);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error(`[API Debug] 请求失败，错误数据:`, errorData);
         throw new Error(errorData.error || `API请求失败: ${response.status}`);
       }
       
-      return await response.json();
+      const responseData = await response.json();
+      console.log(`[API Debug] 响应数据:`, responseData);
+      return responseData;
     } catch (error) {
-      console.error('API请求失败:', error);
+      console.error(`[API Debug] 请求异常:`, error);
       throw error;
     }
   }

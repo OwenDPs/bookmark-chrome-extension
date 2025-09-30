@@ -1,7 +1,5 @@
 // 数据库初始化和管理模块
 
-import { readFileSync } from 'fs';
-
 /**
  * 数据库工具类
  */
@@ -34,7 +32,7 @@ export class DatabaseUtils {
     try {
       console.log('[DatabaseUtils] 开始初始化数据库...');
 
-      // 读取迁移文件
+      // 直接嵌入的迁移SQL，避免使用fs模块
       const migrationSQL = `
         -- 用户表
         CREATE TABLE IF NOT EXISTS users (

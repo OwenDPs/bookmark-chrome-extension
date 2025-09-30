@@ -15,7 +15,7 @@ vars = { ENVIRONMENT = "development" }
 [[d1_databases]]
 binding = "BOOKMARK_DB"
 database_name = "bookmark-db"
-database_id = "bookmark-db" # 使用数据库名称作为ID
+database_id = "50b9a6da-8ae2-4689-a055-492bc2ef71ab" # 需要替换为实际的D1数据库UUID
 
 # 开发环境配置
 [env.development.d1_databases]

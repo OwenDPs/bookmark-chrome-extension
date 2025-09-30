@@ -21,13 +21,16 @@ export class APIClient {
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+    console.log(`[API Debug] ====== 开始API请求 ======`);
     console.log(`[API Debug] 发送请求到: ${url}`);
     console.log(`[API Debug] 使用的baseUrl: ${this.baseUrl}`);
     console.log(`[API Debug] 请求端点: ${endpoint}`);
     console.log(`[API Debug] 请求方法: ${options.method || 'GET'}`);
     console.log(`[API Debug] 请求选项:`, options);
     console.log(`[API Debug] baseUrl是否为默认值: ${this.baseUrl === 'https://your-worker.your-subdomain.workers.dev'}`);
+    console.log(`[API Debug] baseUrl是否为配置值: ${this.baseUrl === 'https://bookmark-chrome.xto.workers.dev/'}`);
     console.log(`[API Debug] 完整URL: ${url}`);
+    console.log(`[API Debug] 当前时间戳:`, new Date().toISOString());
     
     const token = await getAuthToken();
     console.log(`[API Debug] 认证token: ${token ? '存在' : '不存在'}`);
@@ -60,12 +63,35 @@ export class APIClient {
       
       if (!response.ok) {
         console.log(`[API Debug] 响应不成功，尝试解析错误信息...`);
-        const errorData = await response.json().catch(() => {
-          console.log(`[API Debug] 无法解析JSON响应，使用文本响应`);
-          return response.text().then(text => ({ message: text }));
+        console.log(`[API Debug] 响应状态码: ${response.status}`);
+        console.log(`[API Debug] 响应状态文本: ${response.statusText}`);
+        
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.log(`[API Debug] 成功解析JSON错误响应:`, errorData);
+        } catch (jsonError) {
+          console.log(`[API Debug] 无法解析JSON响应，尝试获取文本响应:`, jsonError);
+          try {
+            const textResponse = await response.text();
+            errorData = { message: textResponse };
+            console.log(`[API Debug] 文本响应内容:`, textResponse);
+          } catch (textError) {
+            console.log(`[API Debug] 无法获取文本响应:`, textError);
+            errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+          }
+        }
+        
+        console.error(`[API Debug] 最终错误数据:`, errorData);
+        console.error(`[API Debug] 完整响应对象:`, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
         });
-        console.error(`[API Debug] 请求失败，错误数据:`, errorData);
-        throw new Error(errorData.error || errorData.message || `API请求失败: ${response.status}`);
+        
+        const errorMessage = errorData.error || errorData.message || `API请求失败: ${response.status}`;
+        console.error(`[API Debug] 抛出错误:`, errorMessage);
+        throw new Error(errorMessage);
       }
       
       console.log(`[API Debug] 响应成功，解析JSON数据...`);

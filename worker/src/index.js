@@ -94,6 +94,7 @@ export default {
     const method = request.method;
     
     console.log(`[Worker Debug] ====== Worker 开始处理请求 ======`);
+    console.log(`[Worker Debug] 当前时间戳:`, new Date().toISOString());
     console.log(`[Worker Debug] 收到请求: ${method} ${url.href}`);
     console.log(`[Worker Debug] 请求路径: ${path}`);
     console.log(`[Worker Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
@@ -102,6 +103,9 @@ export default {
       hasJwtSecret: !!env.JWT_SECRET,
       corsOrigin: env.CORS_ORIGIN
     });
+    console.log(`[Worker Debug] 请求来源:`, request.headers.get('Origin'));
+    console.log(`[Worker Debug] 请求的Content-Type:`, request.headers.get('Content-Type'));
+    console.log(`[Worker Debug] 请求的Authorization:`, request.headers.get('Authorization') ? '存在' : '不存在');
     
     // 初始化速率限制表
     try {
@@ -122,6 +126,13 @@ export default {
       console.log(`[Worker Debug] 开始路由处理`);
       console.log(`[Worker Debug] 路由器对象:`, router);
       console.log(`[Worker Debug] 路由器路由数量:`, Object.keys(router.routes).length);
+      console.log(`[Worker Debug] 所有注册的路由:`, Object.keys(router.routes));
+      console.log(`[Worker Debug] 认证相关路由检查:`);
+      console.log(`[Worker Debug] - POST:/api/auth/login: ${!!router.routes['POST:/api/auth/login']}`);
+      console.log(`[Worker Debug] - POST:/api/auth/register: ${!!router.routes['POST:/api/auth/register']}`);
+      console.log(`[Worker Debug] - POST:/api/user/verify: ${!!router.routes['POST:/api/user/verify']}`);
+      console.log(`[Worker Debug] - GET:/api/user/info: ${!!router.routes['GET:/api/user/info']}`);
+      
       // 使用路由器处理请求
       const response = await router.handle(request, env);
       
@@ -131,6 +142,8 @@ export default {
       return addCORSHeaders(response, request, env);
     } catch (error) {
       console.error(`[Worker Debug] 请求处理失败:`, error);
+      console.error(`[Worker Debug] 错误类型:`, error.constructor.name);
+      console.error(`[Worker Debug] 错误消息:`, error.message);
       console.error(`[Worker Debug] 错误堆栈:`, error.stack);
       
       // 添加CORS头到错误响应

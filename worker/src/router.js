@@ -95,23 +95,48 @@ export class Router {
     const key = `${method}:${path}`;
 
     console.log(`[Router Debug] ====== 开始处理请求 ======`);
+    console.log(`[Router Debug] 当前时间戳:`, new Date().toISOString());
     console.log(`[Router Debug] 收到请求: ${method} ${path}`);
     console.log(`[Router Debug] 完整请求URL: ${request.url}`);
     console.log(`[Router Debug] 查找路由键: ${key}`);
     console.log(`[Router Debug] 已注册的路由:`, Object.keys(this.routes));
     console.log(`[Router Debug] 路由总数: ${Object.keys(this.routes).length}`);
     console.log(`[Router Debug] 请求头:`, Object.fromEntries(request.headers.entries()));
+    console.log(`[Router Debug] 请求体内容类型:`, request.headers.get('Content-Type'));
+    
+    // 记录所有认证相关的路由
+    const authRoutes = Object.keys(this.routes).filter(route => route.includes('auth'));
+    console.log(`[Router Debug] 认证相关路由:`, authRoutes);
     
     // 查找路由
     const route = this.routes[key];
     if (!route) {
       console.log(`[Router Debug] 精确匹配失败，尝试匹配带参数的路由`);
       console.log(`[Router Debug] 查找路径: ${path}, 方法: ${method}`);
+      console.log(`[Router Debug] 请求的完整路径: ${url.pathname + url.search}`);
+      console.log(`[Router Debug] URL查询参数:`, Object.fromEntries(url.searchParams.entries()));
+      
       // 尝试匹配带参数的路由，如 /api/bookmarks/:id
       const matchedRoute = this.matchRoute(path, method);
       if (!matchedRoute) {
         console.log(`[Router Debug] 路由匹配失败，返回404`);
         console.log(`[Router Debug] 可用的路由键:`, Object.keys(this.routes).join(', '));
+        console.log(`[Router Debug] 特别注意 - 检查是否有以下认证路由:`);
+        console.log(`[Router Debug] - POST:/api/auth/login: ${!!this.routes['POST:/api/auth/login']}`);
+        console.log(`[Router Debug] - POST:/api/auth/register: ${!!this.routes['POST:/api/auth/register']}`);
+        console.log(`[Router Debug] - POST:/api/user/verify: ${!!this.routes['POST:/api/user/verify']}`);
+        console.log(`[Router Debug] - GET:/api/user/info: ${!!this.routes['GET:/api/user/info']}`);
+        
+        // 检查路径末尾是否有斜杠
+        if (path.endsWith('/')) {
+          const pathWithoutSlash = path.slice(0, -1);
+          console.log(`[Router Debug] 路径末尾有斜杠，尝试无斜杠版本: ${pathWithoutSlash}`);
+          const routeWithoutSlash = this.routes[`${method}:${pathWithoutSlash}`];
+          if (routeWithoutSlash) {
+            console.log(`[Router Debug] 找到无斜杠版本的路由，建议客户端使用: ${pathWithoutSlash}`);
+          }
+        }
+        
         return createErrorResponse('未找到路由', 404);
       }
       

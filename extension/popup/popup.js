@@ -157,15 +157,26 @@ async function handleLogin() {
   }
   
   try {
+    console.log('[Login Debug] ====== 开始登录流程 ======');
+    console.log('[Login Debug] 输入的邮箱:', email);
+    console.log('[Login Debug] API_BASE_URL:', API_BASE_URL);
+    console.log('[Login Debug] apiClient对象:', apiClient);
+    
     const data = await errorHandler.handleApiCall(
       () => apiClient.auth.login(email, password),
       '登录失败'
     );
+    
+    console.log('[Login Debug] 登录成功，返回数据:', data);
     saveAuthToken(data.token);
     showBookmarkSection();
     loadBookmarks();
     showNotification('登录成功', 'success');
   } catch (error) {
+    console.log('[Login Debug] 登录失败，详细错误:', error);
+    console.log('[Login Debug] 错误类型:', error.constructor.name);
+    console.log('[Login Debug] 错误消息:', error.message);
+    console.log('[Login Debug] 错误堆栈:', error.stack);
     // 错误已经在handleApiCall中处理
   }
 }

@@ -10,6 +10,9 @@ vars = { ENVIRONMENT = "staging" }
 
 [env.development]
 vars = { ENVIRONMENT = "development" }
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
 
 # D1数据库配置
 [[d1_databases]]
@@ -18,10 +21,10 @@ database_name = "bookmark-db"
 database_id = "50b9a6da-8ae2-4689-a055-492bc2ef71ab" # 需要替换为实际的D1数据库UUID
 
 # 开发环境配置
-[env.development.d1_databases]
-binding = "BOOKMARK_DB"
-database_name = "bookmark-db-dev"
-database_id = "bookmark-db-dev" # 开发环境数据库ID
+#[env.development.d1_databases]
+#binding = "BOOKMARK_DB"
+#database_name = "bookmark-db-dev"
+#database_id = "bookmark-db-dev" # 开发环境数据库ID
 
 # 环境变量将在部署时通过wrangler secret设置
 # [vars]

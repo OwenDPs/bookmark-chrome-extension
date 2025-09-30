@@ -113,20 +113,34 @@ export class ErrorHandler {
    * @param {Error} error - 错误对象
    */
   handleError(error) {
-    console.error('Error occurred:', error);
+    console.log(`[ErrorHandler Debug] ====== 开始处理错误 ======`);
+    console.error(`[ErrorHandler Debug] 原始错误对象:`, error);
+    console.error(`[ErrorHandler Debug] 错误类型:`, error.constructor.name);
+    console.error(`[ErrorHandler Debug] 错误消息:`, error.message);
+    console.error(`[ErrorHandler Debug] 错误堆栈:`, error.stack);
 
     if (error instanceof AppError) {
+      console.log(`[ErrorHandler Debug] 这是AppError，显示通知:`, error.message);
       this.showNotification(error.message, error.severity);
       return;
     }
 
     // 处理其他类型的错误
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.log(`[ErrorHandler Debug] 网络连接失败错误`);
       this.showNotification('网络连接失败，请检查网络设置', ErrorSeverity.ERROR);
       return;
     }
 
+    // 处理"未找到路由"错误
+    if (error.message && error.message.includes('未找到路由')) {
+      console.log(`[ErrorHandler Debug] 路由未找到错误`);
+      this.showNotification('服务器路由未找到，请检查API配置', ErrorSeverity.ERROR);
+      return;
+    }
+
     // 默认错误处理
+    console.log(`[ErrorHandler Debug] 默认错误处理`);
     this.showNotification('发生未知错误，请稍后重试', ErrorSeverity.ERROR);
   }
 
@@ -160,11 +174,27 @@ export class ErrorHandler {
    * @returns {Promise} API调用结果
    */
   async handleApiCall(apiCall, errorMessage = '操作失败') {
+    console.log(`[ErrorHandler Debug] ====== 开始处理API调用 ======`);
+    console.log(`[ErrorHandler Debug] 默认错误消息: ${errorMessage}`);
+    
     try {
-      return await apiCall();
+      console.log(`[ErrorHandler Debug] 执行API调用...`);
+      const result = await apiCall();
+      console.log(`[ErrorHandler Debug] API调用成功，返回结果:`, result);
+      return result;
     } catch (error) {
+      console.log(`[ErrorHandler Debug] API调用失败，原始错误:`, error);
+      console.log(`[ErrorHandler Debug] 错误类型:`, error.constructor.name);
+      console.log(`[ErrorHandler Debug] 错误消息:`, error.message);
+      console.log(`[ErrorHandler Debug] 错误堆栈:`, error.stack);
+      
       const apiError = this.handleApiError(error);
+      console.log(`[ErrorHandler Debug] 处理后的API错误:`, apiError);
+      
+      console.log(`[ErrorHandler Debug] 调用handleError显示错误...`);
       this.handleError(apiError);
+      
+      console.log(`[ErrorHandler Debug] 重新抛出API错误...`);
       throw apiError;
     }
   }

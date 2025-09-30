@@ -1,6 +1,6 @@
 name = "bookmark-chrome"
 main = "src/index.js"
-compatibility_date = "2023-01-01"
+compatibility_date = "2025-09-30"
 
 [env.production]
 vars = { ENVIRONMENT = "production" }

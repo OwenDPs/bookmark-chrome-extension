@@ -306,16 +306,35 @@ export const SecurityMiddleware = {
  */
 export async function createRateLimitTable(env) {
   try {
-    await env.BOOKMARK_DB.exec(`
-      CREATE TABLE IF NOT EXISTS rate_limits (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key TEXT NOT NULL,
-        timestamp INTEGER NOT NULL
-      );
-      
-      CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp);
-    `);
+    console.log('[SecurityUtils] 开始创建速率限制表...');
+
+    // 先检查表是否已存在
+    const existingTable = await env.BOOKMARK_DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='rate_limits'"
+    ).first();
+
+    if (!existingTable) {
+      console.log('[SecurityUtils] 表不存在，正在创建...');
+
+      // 使用prepare和run而不是exec，避免模板字符串问题
+      await env.BOOKMARK_DB.prepare(`
+        CREATE TABLE rate_limits (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          key TEXT NOT NULL,
+          timestamp INTEGER NOT NULL
+        )
+      `).run();
+
+      await env.BOOKMARK_DB.prepare(`
+        CREATE INDEX IF NOT EXISTS idx_rate_limits_key_timestamp ON rate_limits(key, timestamp)
+      `).run();
+
+      console.log('[SecurityUtils] 速率限制表创建成功');
+    } else {
+      console.log('[SecurityUtils] 速率限制表已存在，跳过创建');
+    }
   } catch (error) {
-    console.error('创建速率限制表失败:', error);
+    console.error('[SecurityUtils] 创建速率限制表失败:', error);
+    throw error;
   }
 }

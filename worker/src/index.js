@@ -7,6 +7,7 @@ import { withAuth } from './middleware.js';
 import { createErrorResponse } from './errorHandler.js';
 import { SecurityMiddleware, createRateLimitTable } from './security.js';
 import { PerformanceMiddleware, PerformanceUtils } from './performance.js';
+import { DatabaseUtils, createRateLimitTable as createRateLimitTableDB } from './database.js';
 
 // 创建路由器实例
 const router = createRouter();
@@ -107,10 +108,22 @@ export default {
     console.log(`[Worker Debug] 请求的Content-Type:`, request.headers.get('Content-Type'));
     console.log(`[Worker Debug] 请求的Authorization:`, request.headers.get('Authorization') ? '存在' : '不存在');
     
-    // 初始化速率限制表
+    // 初始化数据库
+    try {
+      console.log(`[Worker Debug] 检查并初始化数据库...`);
+      await DatabaseUtils.ensureDatabaseInitialized(env);
+      console.log(`[Worker Debug] 数据库初始化完成`);
+    } catch (error) {
+      console.error(`[Worker Debug] 数据库初始化失败:`, error);
+      // 数据库初始化失败时，返回错误响应
+      const corsHeaders = setCORSHeaders(request, env);
+      return createErrorResponse('数据库初始化失败', 500, corsHeaders);
+    }
+
+    // 初始化速率限制表（备用方案）
     try {
       console.log(`[Worker Debug] 初始化速率限制表...`);
-      await createRateLimitTable(env);
+      await createRateLimitTableDB(env);
       console.log(`[Worker Debug] 速率限制表初始化成功`);
     } catch (error) {
       console.error(`[Worker Debug] 速率限制表初始化失败:`, error);

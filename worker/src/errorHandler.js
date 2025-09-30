@@ -93,19 +93,39 @@ export class NotFoundError extends AppError {
 export function withErrorHandling(handler) {
   return async (request, env, ...args) => {
     try {
-      return await handler(request, env, ...args);
+      console.log(`[ErrorHandler Debug] ====== 开始执行包装的处理函数 ======`);
+      console.log(`[ErrorHandler Debug] 请求URL:`, request.url);
+      console.log(`[ErrorHandler Debug] 请求方法:`, request.method);
+      
+      const result = await handler(request, env, ...args);
+      
+      console.log(`[ErrorHandler Debug] 处理函数执行成功`);
+      console.log(`[ErrorHandler Debug] 响应类型:`, result.constructor.name);
+      console.log(`[ErrorHandler Debug] 响应状态:`, result.status);
+      
+      return result;
     } catch (error) {
-      console.error('Request failed:', error);
+      console.error(`[ErrorHandler Debug] ====== 处理函数执行失败 ======`);
+      console.error(`[ErrorHandler Debug] 错误类型:`, error.constructor.name);
+      console.error(`[ErrorHandler Debug] 错误消息:`, error.message);
+      console.error(`[ErrorHandler Debug] 错误堆栈:`, error.stack);
       
       if (error instanceof AppError) {
-        return createErrorResponse(error.message, error.status);
+        console.log(`[ErrorHandler Debug] 这是应用自定义错误，使用错误消息:`, error.message);
+        const errorResponse = createErrorResponse(error.message, error.status);
+        console.log(`[ErrorHandler Debug] 创建的错误响应状态:`, errorResponse.status);
+        return errorResponse;
       }
       
       // 处理其他类型的错误
-      return createErrorResponse(
-        error.message || '服务器内部错误',
-        error.status || 500
-      );
+      const errorMessage = error.message || '服务器内部错误';
+      const errorStatus = error.status || 500;
+      console.log(`[ErrorHandler Debug] 使用默认错误处理，消息:`, errorMessage, '状态:', errorStatus);
+      
+      const errorResponse = createErrorResponse(errorMessage, errorStatus);
+      console.log(`[ErrorHandler Debug] 创建的错误响应状态:`, errorResponse.status);
+      
+      return errorResponse;
     }
   };
 }
@@ -118,13 +138,29 @@ export function withErrorHandling(handler) {
  * @returns {Response} 错误响应
  */
 export function createErrorResponse(message, status = 400, headers = {}) {
-  return new Response(JSON.stringify({ error: message }), {
+  console.log(`[ErrorHandler Debug] 创建错误响应:`, {
+    message,
+    status,
+    headers
+  });
+  
+  const responseBody = JSON.stringify({ error: message });
+  console.log(`[ErrorHandler Debug] 错误响应体:`, responseBody);
+  
+  const response = new Response(responseBody, {
     status,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
     },
   });
+  
+  console.log(`[ErrorHandler Debug] 错误响应对象:`, {
+    status: response.status,
+    headers: Object.fromEntries(response.headers.entries())
+  });
+  
+  return response;
 }
 
 /**

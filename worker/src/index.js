@@ -50,13 +50,26 @@ function handleOptionsRequest(request, env) {
 
 // 工具函数：添加CORS头到响应
 function addCORSHeaders(response, request, env) {
-  const corsHeaders = setCORSHeaders(request, env);
-  const headers = { ...response.headers, ...corsHeaders };
+  console.log(`[Worker Debug] ====== 开始添加CORS头 ======`);
+  console.log(`[Worker Debug] 原始响应状态:`, response.status);
+  console.log(`[Worker Debug] 原始响应头:`, Object.fromEntries(response.headers.entries()));
   
-  return new Response(response.body, {
+  const corsHeaders = setCORSHeaders(request, env);
+  console.log(`[Worker Debug] CORS头:`, corsHeaders);
+  
+  const headers = { ...response.headers, ...corsHeaders };
+  console.log(`[Worker Debug] 合并后的响应头:`, headers);
+  
+  const newResponse = new Response(response.body, {
     status: response.status,
     headers
   });
+  
+  console.log(`[Worker Debug] 新响应状态:`, newResponse.status);
+  console.log(`[Worker Debug] 新响应头:`, Object.fromEntries(newResponse.headers.entries()));
+  console.log(`[Worker Debug] ====== CORS头添加完成 ======`);
+  
+  return newResponse;
 }
 
 // 注册全局中间件
@@ -151,8 +164,29 @@ export default {
       
       console.log(`[Worker Debug] 路由处理成功，响应状态: ${response.status}`);
       console.log(`[Worker Debug] 响应头:`, Object.fromEntries(response.headers.entries()));
+      
+      // 检查响应体内容
+      try {
+        const responseClone = response.clone();
+        const responseText = await responseClone.text();
+        console.log(`[Worker Debug] 响应体内容: ${responseText}`);
+        
+        // 验证是否为有效JSON
+        try {
+          JSON.parse(responseText);
+          console.log(`[Worker Debug] 响应体是有效的JSON`);
+        } catch (jsonError) {
+          console.error(`[Worker Debug] 响应体不是有效的JSON:`, jsonError);
+        }
+      } catch (error) {
+        console.error(`[Worker Debug] 无法读取响应体:`, error);
+      }
+      
       // 添加CORS头
-      return addCORSHeaders(response, request, env);
+      const finalResponse = addCORSHeaders(response, request, env);
+      console.log(`[Worker Debug] 最终响应状态: ${finalResponse.status}`);
+      console.log(`[Worker Debug] 最终响应头:`, Object.fromEntries(finalResponse.headers.entries()));
+      return finalResponse;
     } catch (error) {
       console.error(`[Worker Debug] 请求处理失败:`, error);
       console.error(`[Worker Debug] 错误类型:`, error.constructor.name);
@@ -161,7 +195,30 @@ export default {
       
       // 添加CORS头到错误响应
       const corsHeaders = setCORSHeaders(request, env);
-      return createErrorResponse('服务器内部错误', 500, corsHeaders);
+      console.log(`[Worker Debug] CORS头:`, corsHeaders);
+      
+      const errorResponse = createErrorResponse('服务器内部错误', 500, corsHeaders);
+      console.log(`[Worker Debug] 错误响应状态:`, errorResponse.status);
+      console.log(`[Worker Debug] 错误响应头:`, Object.fromEntries(errorResponse.headers.entries()));
+      
+      // 检查错误响应体内容
+      try {
+        const errorResponseClone = errorResponse.clone();
+        const errorResponseText = await errorResponseClone.text();
+        console.log(`[Worker Debug] 错误响应体内容: ${errorResponseText}`);
+        
+        // 验证是否为有效JSON
+        try {
+          JSON.parse(errorResponseText);
+          console.log(`[Worker Debug] 错误响应体是有效的JSON`);
+        } catch (jsonError) {
+          console.error(`[Worker Debug] 错误响应体不是有效的JSON:`, jsonError);
+        }
+      } catch (readError) {
+        console.error(`[Worker Debug] 无法读取错误响应体:`, readError);
+      }
+      
+      return errorResponse;
     }
   }
 };

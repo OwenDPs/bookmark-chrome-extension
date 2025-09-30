@@ -12,7 +12,7 @@ export async function verifyToken(token, JWT_SECRET) {
 }
 
 // 工具函数：HMAC-SHA256
-async function hmacSha256(message, secret) {
+export async function hmacSha256(message, secret) {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
   const messageData = encoder.encode(message);

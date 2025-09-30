@@ -235,35 +235,63 @@ export class PerformanceUtils {
  */
 export const PerformanceMiddleware = {
   /**
-   * 响应时间监控中间件
-   * @param {PerformanceUtils.PerformanceMonitor} monitor - 性能监控器
-   * @returns {Function} 中间件函数
-   */
-  responseTimeMonitor(monitor) {
-    return async (request, env, next) => {
-      monitor.recordRequest();
-      
-      const startTime = Date.now();
-      
-      try {
-        const response = await next(request, env);
-        
-        const responseTime = Date.now() - startTime;
-        monitor.recordResponseTime(responseTime);
-        
-        // 添加响应时间头
-        response.headers.set('X-Response-Time', responseTime.toString());
-        
-        return response;
-      } catch (error) {
-        const responseTime = Date.now() - startTime;
-        monitor.recordResponseTime(responseTime);
-        monitor.recordError();
-        
-        throw error;
-      }
-    };
-  },
+    * 响应时间监控中间件
+    * @param {PerformanceUtils.PerformanceMonitor} monitor - 性能监控器
+    * @returns {Function} 中间件函数
+    */
+   responseTimeMonitor(monitor) {
+     return async (request, env, next) => {
+       monitor.recordRequest();
+
+       const startTime = Date.now();
+
+       try {
+         const response = await next(request, env);
+
+         // 确保响应对象有效
+         if (!response) {
+           console.warn('[Performance Debug] 响应对象为空，返回默认响应');
+           const defaultResponse = new Response('服务器内部错误', { status: 500 });
+           const responseTime = Date.now() - startTime;
+           monitor.recordResponseTime(responseTime);
+           monitor.recordError();
+           return defaultResponse;
+         }
+
+         // 检查响应对象是否有headers属性，如果没有则创建一个
+         if (!response.headers || typeof response.headers.set !== 'function') {
+           console.warn('[Performance Debug] 响应对象缺少headers属性，创建新的响应对象');
+           const responseBody = response.body || '服务器内部错误';
+           const responseStatus = response.status || 200;
+           const newResponse = new Response(responseBody, {
+             status: responseStatus,
+             headers: {
+               'Content-Type': 'application/json',
+               'X-Response-Time': (Date.now() - startTime).toString()
+             }
+           });
+
+           const responseTime = Date.now() - startTime;
+           monitor.recordResponseTime(responseTime);
+           return newResponse;
+         }
+
+         const responseTime = Date.now() - startTime;
+         monitor.recordResponseTime(responseTime);
+
+         // 添加响应时间头
+         response.headers.set('X-Response-Time', responseTime.toString());
+
+         return response;
+       } catch (error) {
+         const responseTime = Date.now() - startTime;
+         monitor.recordResponseTime(responseTime);
+         monitor.recordError();
+
+         throw error;
+       }
+     };
+   },
 
   /**
    * 缓存中间件

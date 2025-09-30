@@ -117,7 +117,7 @@ export default {
       console.error(`[Worker Debug] 数据库初始化失败:`, error);
       // 数据库初始化失败时，返回错误响应
       const corsHeaders = setCORSHeaders(request, env);
-      return createErrorResponse('数据库初始化失败', 500, corsHeaders);
+      return createErrorResponse('Database initialization failed', 500, corsHeaders);
     }
 
     // 初始化速率限制表（备用方案）

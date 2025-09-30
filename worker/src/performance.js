@@ -356,8 +356,8 @@ export const PerformanceMiddleware = {
       try {
         await env.BOOKMARK_DB.prepare('SELECT 1').first();
       } catch (error) {
-        console.error('数据库连接失败:', error);
-        return new Response('数据库连接失败', { status: 503 });
+        console.error('Database connection failed:', error);
+        return new Response('Database connection failed', { status: 503 });
       }
       
       return next(request, env);

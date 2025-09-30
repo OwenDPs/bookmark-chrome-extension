@@ -47,13 +47,13 @@ export const AuthController = {
     // 验证邮箱格式
     if (!isValidEmail(email)) {
       console.log(`[AuthController Debug] 邮箱格式验证失败: ${email}`);
-      throw new ValidationError('邮箱格式不正确');
+      throw new ValidationError('Invalid email format');
     }
-    
+
     // 检查是否为临时邮箱
     if (SecurityUtils.isTemporaryEmail(email)) {
       console.log(`[AuthController Debug] 临时邮箱验证失败: ${email}`);
-      throw new ValidationError('不支持使用临时邮箱注册');
+      throw new ValidationError('Temporary email addresses are not supported');
     }
     
     // 验证密码强度
@@ -66,7 +66,7 @@ export const AuthController = {
     // 检查是否为常见密码
     if (SecurityUtils.isCommonPassword(password)) {
       console.log(`[AuthController Debug] 常见密码验证失败`);
-      throw new ValidationError('密码过于常见，请使用更复杂的密码');
+      throw new ValidationError('Password is too common, please use a more complex password');
     }
     
     console.log(`[AuthController Debug] 基本验证通过，检查数据库连接...`);
@@ -78,7 +78,7 @@ export const AuthController = {
     
     if (existingUser) {
       console.log(`[AuthController Debug] 用户已存在: ${email}`);
-      throw new ValidationError('该邮箱已被注册');
+      throw new ValidationError('Email address is already registered');
     }
     
     console.log(`[AuthController Debug] 用户不存在，开始创建用户...`);
@@ -100,7 +100,7 @@ export const AuthController = {
     
     console.log(`[AuthController Debug] 注册流程完成，返回成功响应`);
     return createJSONResponse({
-      message: '注册成功',
+      message: 'Registration successful',
       token,
       user: {
         id: result.id,
@@ -131,20 +131,20 @@ export const AuthController = {
     ).bind(email).first();
     
     if (!user) {
-      throw new ValidationError('邮箱或密码不正确');
+      throw new ValidationError('Invalid email or password');
     }
-    
+
     // 验证密码
     const isPasswordValid = await verifyPassword(password, user.password_hash);
     if (!isPasswordValid) {
-      throw new ValidationError('邮箱或密码不正确');
+      throw new ValidationError('Invalid email or password');
     }
     
     // 生成JWT令牌
     const token = await TokenService.generateToken(user.id, user.email, env.JWT_SECRET);
     
     return createJSONResponse({
-      message: '登录成功',
+      message: 'Login successful',
       token,
       user: {
         id: user.id,
@@ -351,7 +351,7 @@ export const BookmarkController = {
       'DELETE FROM bookmarks WHERE id = ? AND user_id = ?'
     ).bind(bookmarkId, userId).run();
     
-    return createJSONResponse({ message: '收藏夹删除成功' });
+    return createJSONResponse({ message: 'Bookmark deleted successfully' });
   })
 };
 
@@ -382,10 +382,10 @@ async function parseRequestBody(request) {
  */
 function validateRequestBody(data, requiredFields) {
   const errors = [];
-  
+
   for (const field of requiredFields) {
     if (!data[field]) {
-      errors.push(`${field}不能为空`);
+      errors.push(`${field} is required`);
     }
   }
   

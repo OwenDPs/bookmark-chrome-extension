@@ -116,7 +116,7 @@ export class TokenService {
       return { valid: true, user };
     } catch (error) {
       console.error('Token verification failed:', error);
-      return { valid: false, error: '验证用户失败', status: 500 };
+      return { valid: false, error: 'Token verification failed', status: 500 };
     }
   }
 }

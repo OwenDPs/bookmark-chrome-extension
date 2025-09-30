@@ -65,34 +65,34 @@ export class SecurityUtils {
     
     if (password.length < 8) {
       result.valid = false;
-      result.errors.push('密码长度不能少于8位');
+      result.errors.push('Password must be at least 8 characters long');
     } else {
       result.score += 1;
     }
-    
+
     if (!/[a-z]/.test(password)) {
       result.valid = false;
-      result.errors.push('密码必须包含小写字母');
+      result.errors.push('Password must contain lowercase letters');
     } else {
       result.score += 1;
     }
-    
+
     if (!/[A-Z]/.test(password)) {
       result.valid = false;
-      result.errors.push('密码必须包含大写字母');
+      result.errors.push('Password must contain uppercase letters');
     } else {
       result.score += 1;
     }
-    
+
     if (!/[0-9]/.test(password)) {
       result.valid = false;
-      result.errors.push('密码必须包含数字');
+      result.errors.push('Password must contain numbers');
     } else {
       result.score += 1;
     }
-    
+
     if (!/[^a-zA-Z0-9]/.test(password)) {
-      result.errors.push('建议密码包含特殊字符');
+      result.errors.push('Password should contain special characters');
     } else {
       result.score += 1;
     }

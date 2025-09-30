@@ -43,7 +43,7 @@ export function validateRequestBody(data, requiredFields) {
   
   for (const field of requiredFields) {
     if (!data[field]) {
-      errors.push(`${field}不能为空`);
+      errors.push(`${field} is required`);
     }
   }
   

@@ -1,4 +1,4 @@
-name = "bookmark-worker"
+name = "bookmark-chrome"
 main = "src/index.js"
 compatibility_date = "2023-01-01"
 
@@ -14,14 +14,14 @@ vars = { ENVIRONMENT = "development" }
 # D1数据库配置
 [[d1_databases]]
 binding = "BOOKMARK_DB"
-database_name = "bookmark_db"
-database_id = "your-database-id" # 需要替换为实际的D1数据库ID
+database_name = "bookmark-db"
+database_id = "bookmark-db" # 使用数据库名称作为ID
 
 # 开发环境配置
 [env.development.d1_databases]
 binding = "BOOKMARK_DB"
-database_name = "bookmark_db_dev"
-database_id = "your-dev-database-id" # 需要替换为开发环境的D1数据库ID
+database_name = "bookmark-db-dev"
+database_id = "bookmark-db-dev" # 开发环境数据库ID
 
 # 环境变量将在部署时通过wrangler secret设置
 # [vars]

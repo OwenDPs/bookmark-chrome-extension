@@ -251,7 +251,12 @@ export const PerformanceMiddleware = {
          // 确保响应对象有效
          if (!response) {
            console.warn('[Performance Debug] 响应对象为空，返回默认响应');
-           const defaultResponse = new Response('服务器内部错误', { status: 500 });
+           const defaultResponse = new Response(JSON.stringify({ error: '服务器内部错误' }), {
+             status: 500,
+             headers: {
+               'Content-Type': 'application/json'
+             }
+           });
            const responseTime = Date.now() - startTime;
            monitor.recordResponseTime(responseTime);
            monitor.recordError();
@@ -261,8 +266,34 @@ export const PerformanceMiddleware = {
          // 检查响应对象是否有headers属性，如果没有则创建一个
          if (!response.headers || typeof response.headers.set !== 'function') {
            console.warn('[Performance Debug] 响应对象缺少headers属性，创建新的响应对象');
-           const responseBody = response.body || '服务器内部错误';
-           const responseStatus = response.status || 200;
+           
+           // 尝试读取响应体内容
+           let responseBody;
+           let responseStatus = response.status || 200;
+           
+           try {
+             // 如果响应体存在，尝试读取它
+             if (response.body) {
+               const responseClone = response.clone();
+               responseBody = await responseClone.text();
+               
+               // 检查是否已经是JSON格式
+               try {
+                 JSON.parse(responseBody);
+                 console.log('[Performance Debug] 响应体已经是有效的JSON');
+               } catch (jsonError) {
+                 console.warn('[Performance Debug] 响应体不是有效的JSON，转换为JSON格式');
+                 responseBody = JSON.stringify({ error: responseBody || '服务器内部错误' });
+               }
+             } else {
+               // 如果没有响应体，创建JSON格式的错误响应
+               responseBody = JSON.stringify({ error: '服务器内部错误' });
+             }
+           } catch (error) {
+             console.error('[Performance Debug] 无法读取响应体:', error);
+             responseBody = JSON.stringify({ error: '服务器内部错误' });
+           }
+           
            const newResponse = new Response(responseBody, {
              status: responseStatus,
              headers: {
@@ -357,7 +388,12 @@ export const PerformanceMiddleware = {
         await env.BOOKMARK_DB.prepare('SELECT 1').first();
       } catch (error) {
         console.error('Database connection failed:', error);
-        return new Response('Database connection failed', { status: 503 });
+        return new Response(JSON.stringify({ error: 'Database connection failed' }), {
+          status: 503,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
       }
       
       return next(request, env);
